@@ -124,5 +124,5 @@ export type AnalysisResult = {
 export type HistoryItem = AnalysisResult & {
   id: string;
   createdAt: number;
-  thumbnail?: string;
+  thumbnail?: string | undefined;
 };

@@ -10,33 +10,73 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HistoriqueRouteImport } from './routes/historique'
+import { Route as MargeRouteImport } from './routes/marge'
+import { Route as ProRouteImport } from './routes/pro'
+import { Route as ReglagesRouteImport } from './routes/reglages'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HistoriqueRoute = HistoriqueRouteImport.update({
+  id: '/historique',
+  path: '/historique',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MargeRoute = MargeRouteImport.update({
+  id: '/marge',
+  path: '/marge',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglagesRoute = ReglagesRouteImport.update({
+  id: '/reglages',
+  path: '/reglages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/historique': typeof HistoriqueRoute
+  '/marge': typeof MargeRoute
+  '/pro': typeof ProRoute
+  '/reglages': typeof ReglagesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/historique': typeof HistoriqueRoute
+  '/marge': typeof MargeRoute
+  '/pro': typeof ProRoute
+  '/reglages': typeof ReglagesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/historique': typeof HistoriqueRoute
+  '/marge': typeof MargeRoute
+  '/pro': typeof ProRoute
+  '/reglages': typeof ReglagesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/historique' | '/marge' | '/pro' | '/reglages'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/historique' | '/marge' | '/pro' | '/reglages'
+  id: '__root__' | '/' | '/historique' | '/marge' | '/pro' | '/reglages'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HistoriqueRoute: typeof HistoriqueRoute
+  MargeRoute: typeof MargeRoute
+  ProRoute: typeof ProRoute
+  ReglagesRoute: typeof ReglagesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +88,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/historique': {
+      id: '/historique'
+      path: '/historique'
+      fullPath: '/historique'
+      preLoaderRoute: typeof HistoriqueRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/marge': {
+      id: '/marge'
+      path: '/marge'
+      fullPath: '/marge'
+      preLoaderRoute: typeof MargeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglages': {
+      id: '/reglages'
+      path: '/reglages'
+      fullPath: '/reglages'
+      preLoaderRoute: typeof ReglagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HistoriqueRoute: HistoriqueRoute,
+  MargeRoute: MargeRoute,
+  ProRoute: ProRoute,
+  ReglagesRoute: ReglagesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
