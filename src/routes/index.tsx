@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Wand2 } from "lucide-react";
+import { Check, Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { BrandCombobox } from "@/components/BrandCombobox";
@@ -24,6 +24,7 @@ import {
   PLATFORMS,
   SHOE_SIZES,
   SIZES,
+  KID_SIZES,
   type AnalysisResult,
   type Platform,
 } from "@/lib/resell-data";
@@ -34,6 +35,7 @@ import {
   getCredits,
   getPrefs,
   applyTheme,
+  isCreator,
 } from "@/lib/local-store";
 
 export const Route = createFileRoute("/")({
@@ -55,6 +57,12 @@ export const Route = createFileRoute("/")({
   component: Scanner,
 });
 
+const LOADING_STEPS = [
+  "Analyse des visuels par IA...",
+  "Détection de la marque, taille et composition...",
+  "Estimation des prix sur le marché d'occasion...",
+];
+
 function Scanner() {
   const analyze = useServerFn(analyzeGarment);
   const [photos, setPhotos] = useState<Photos>({});
@@ -68,6 +76,8 @@ function Scanner() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [used, setUsed] = useState(0);
   const [paywall, setPaywall] = useState(false);
+  const [creator, setCreator] = useState(false);
+  const [step, setStep] = useState(0);
 
   useEffect(() => {
     const prefs = getPrefs();
@@ -75,21 +85,29 @@ function Scanner() {
     setPlatform(prefs.platform as Platform);
     setCondition(prefs.condition);
     setUsed(getCredits().used);
+    setCreator(isCreator());
   }, []);
 
   const images = Object.values(photos).filter(Boolean) as string[];
-  const sizeOptions = category === "Chaussures" ? SHOE_SIZES : SIZES;
+  const baseSizes =
+    category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
+  const sizeOptions = size && !baseSizes.includes(size) ? [size, ...baseSizes] : baseSizes;
 
   async function run() {
     if (!images.length) {
       toast.error("Ajoutez au moins une photo");
       return;
     }
-    if (used >= FREE_QUOTA) {
+    if (!creator && used >= FREE_QUOTA) {
       setPaywall(true);
       return;
     }
     setLoading(true);
+    setStep(0);
+    const timers = [
+      setTimeout(() => setStep(1), 2500),
+      setTimeout(() => setStep(2), 6000),
+    ];
     try {
       const data = await analyze({
         data: { images, platform, brand, category, subcategory, size, condition },
@@ -101,7 +119,18 @@ function Scanner() {
         : "Moyen";
       const next: AnalysisResult = { ...data, parcel, platform };
       setResult(next);
-      setUsed(consumeCredit().used);
+      if (data.brand) setBrand(data.brand);
+      if (data.category && CATEGORIES[data.category]) {
+        setCategory(data.category);
+        if (data.subcategory && CATEGORIES[data.category]?.includes(data.subcategory)) {
+          setSubcategory(data.subcategory);
+        }
+      }
+      if (data.size) setSize(data.size);
+      if (data.condition && (CONDITIONS as readonly string[]).includes(data.condition)) {
+        setCondition(data.condition);
+      }
+      if (!creator) setUsed(consumeCredit().used);
       addHistory({
         ...next,
         id: crypto.randomUUID(),
@@ -112,7 +141,9 @@ function Scanner() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Analyse impossible");
     } finally {
+      timers.forEach(clearTimeout);
       setLoading(false);
+      setStep(0);
     }
   }
 
@@ -121,7 +152,7 @@ function Scanner() {
       <AppHeader
         title="Scanner"
         subtitle="Analyse photo et estimation de prix"
-        credits={{ used, quota: FREE_QUOTA }}
+        {...(creator ? {} : { credits: { used, quota: FREE_QUOTA } })}
       />
       <div className="app-container space-y-6 py-5">
         <PhotoUploader photos={photos} onChange={setPhotos} />
@@ -231,6 +262,38 @@ function Scanner() {
           )}
           {loading ? "Analyse en cours" : "Analyser et générer"}
         </Button>
+
+        {loading ? (
+          <div className="rounded-xl border border-border bg-card p-4">
+            <div className="space-y-2">
+              {LOADING_STEPS.map((label, i) => (
+                <div
+                  key={label}
+                  className={
+                    i <= step
+                      ? "flex items-center gap-2 text-sm font-medium"
+                      : "flex items-center gap-2 text-sm text-muted-foreground"
+                  }
+                >
+                  {i < step ? (
+                    <Check className="size-4 text-primary" />
+                  ) : i === step ? (
+                    <Loader2 className="size-4 animate-spin text-primary" />
+                  ) : (
+                    <span className="size-4" />
+                  )}
+                  {label}
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-700"
+                style={{ width: `${((step + 1) / LOADING_STEPS.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        ) : null}
 
         {result ? <ResultPanel result={result} /> : null}
       </div>

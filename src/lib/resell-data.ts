@@ -81,6 +81,19 @@ export const CATEGORIES: Record<string, string[]> = {
 };
 
 export const SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL"];
+export const KID_SIZES = [
+  "2 ans (92 cm)",
+  "3 ans (98 cm)",
+  "4 ans (104 cm)",
+  "5 ans (110 cm)",
+  "6 ans (116 cm)",
+  "7 ans (122 cm)",
+  "8 ans (128 cm)",
+  "10 ans (140 cm)",
+  "12 ans (152 cm)",
+  "14 ans (164 cm)",
+  "16 ans (176 cm)",
+];
 export const SHOE_SIZES = Array.from({ length: 15 }, (_, i) => String(34 + i));
 
 export const CONDITIONS = [
@@ -105,6 +118,8 @@ export const PHOTO_SLOTS = [
 
 export type AnalysisResult = {
   type: string;
+  category?: string;
+  subcategory?: string;
   brand: string;
   color: string;
   fit: string;
