@@ -3,6 +3,9 @@ import type { HistoryItem } from "./resell-data";
 const HISTORY_KEY = "rb_history";
 const CREDITS_KEY = "rb_credits";
 const PREFS_KEY = "rb_prefs";
+const CREATOR_KEY = "rb_creator";
+
+export const CREATOR_CODE = "RESELL2026";
 
 export const FREE_QUOTA = 3;
 
@@ -42,6 +45,14 @@ export function removeHistory(id: string) {
 
 export function clearHistory() {
   write(HISTORY_KEY, []);
+}
+
+export function isCreator(): boolean {
+  return read<boolean>(CREATOR_KEY, false) === true;
+}
+
+export function setCreator(value: boolean) {
+  write(CREATOR_KEY, value);
 }
 
 export type Credits = { date: string; used: number };
