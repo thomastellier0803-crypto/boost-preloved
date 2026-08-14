@@ -11,7 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { ShieldCheck } from "lucide-react";
 import {
   applyTheme,
   clearHistory,
@@ -19,6 +21,9 @@ import {
   getHistory,
   getPrefs,
   setPrefs,
+  isCreator,
+  setCreator,
+  CREATOR_CODE,
   type Prefs,
 } from "@/lib/local-store";
 import { CONDITIONS, PLATFORMS } from "@/lib/resell-data";
@@ -44,10 +49,13 @@ export const Route = createFileRoute("/reglages")({
 function SettingsPage() {
   const [prefs, setLocalPrefs] = useState<Prefs>(defaultPrefs);
   const [count, setCount] = useState(0);
+  const [code, setCode] = useState("");
+  const [creator, setCreatorState] = useState(false);
 
   useEffect(() => {
     setLocalPrefs(getPrefs());
     setCount(getHistory().length);
+    setCreatorState(isCreator());
   }, []);
 
   function update(patch: Partial<Prefs>) {
@@ -124,6 +132,61 @@ function SettingsPage() {
               onCheckedChange={(checked) => update({ noEmoji: checked })}
             />
           </div>
+        </section>
+
+        <section className="space-y-3 rounded-xl border border-border bg-card p-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Mode créateur
+          </p>
+          {creator ? (
+            <>
+              <div className="flex items-center gap-2 rounded-lg border border-primary bg-accent p-3 text-sm font-medium">
+                <ShieldCheck className="size-4 text-primary" />
+                Créateur Pro actif — générations illimitées
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setCreator(false);
+                  setCreatorState(false);
+                  toast.success("Mode créateur désactivé");
+                }}
+              >
+                Désactiver le mode créateur
+              </Button>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-code">Code Administrateur</Label>
+                <Input
+                  id="admin-code"
+                  type="password"
+                  autoComplete="off"
+                  maxLength={32}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Saisir le code"
+                />
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (code.trim() === CREATOR_CODE) {
+                    setCreator(true);
+                    setCreatorState(true);
+                    setCode("");
+                    toast.success("Statut Créateur Pro activé");
+                  } else {
+                    toast.error("Code administrateur invalide");
+                  }
+                }}
+              >
+                Valider le code
+              </Button>
+            </>
+          )}
         </section>
 
         <section className="space-y-3 rounded-xl border border-border bg-card p-4">
