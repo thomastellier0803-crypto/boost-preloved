@@ -152,7 +152,7 @@ function Scanner() {
       <AppHeader
         title="Scanner"
         subtitle="Analyse photo et estimation de prix"
-        credits={creator ? undefined : { used, quota: FREE_QUOTA }}
+        {...(creator ? {} : { credits: { used, quota: FREE_QUOTA } })}
       />
       <div className="app-container space-y-6 py-5">
         <PhotoUploader photos={photos} onChange={setPhotos} />
