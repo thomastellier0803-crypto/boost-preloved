@@ -13,6 +13,8 @@ const inputSchema = z.object({
 
 const outputSchema = z.object({
   type: z.string().default(""),
+  category: z.string().default(""),
+  subcategory: z.string().default(""),
   brand: z.string().default(""),
   color: z.string().default(""),
   fit: z.string().default(""),
@@ -43,17 +45,26 @@ RÈGLES DE PRIX (marché français réel de l'occasion, en euros) :
 - Pièces rares, vintage haut de gamme, luxe (Stone Island, Supreme, Burberry, Moncler...) = 25 à 60 € et plus.
 Réduis le prix si l'état est moyen ou si des défauts sont visibles.
 
+CLASSIFICATION (obligatoire, utilise EXACTEMENT ces valeurs) :
+- category : Haut | Bas | Veste | Robe | Chaussures | Accessoire
+- subcategory : une valeur cohérente (T-shirt, Chemise, Polo, Pull, Sweat, Hoodie, Gilet, Débardeur, Jean, Pantalon, Chino, Jogging, Short, Cargo, Jupe, Veste légère, Blouson, Doudoune, Manteau, Parka, Coupe-vent, Cuir, Robe courte, Robe longue, Combinaison, Baskets, Bottes, Sandales, Mocassins, Chaussures de ville, Sac, Ceinture, Casquette, Bonnet, Écharpe, Montre)
+- condition : Neuf avec étiquette | Neuf sans étiquette | Très bon état | Bon état | Satisfaisant
+- size : adulte (XS, S, M, L, XL, 2XL, 3XL), pointure (34 à 48) ou taille enfant au format exact "14 ans (164 cm)".
+
 FORMAT DE COLIS VINTED : Petit (< 500 g), Moyen (< 1 kg), Grand (< 2 kg).
 
 RÉDACTION :
 - Aucun emoji, jamais, nulle part.
 - Titre court et optimisé : Type + Marque + Couleur + Taille.
 - Description structurée, factuelle, en français, mentionnant marque, taille, matière/composition, coupe, état, et signalant honnêtement toute usure, tache ou bouloche détectée.
-- Adapte le ton au format demandé : Vinted (concis, mots-clés), Leboncoin (annonce classique avec retrait possible), Vestiaire Collective (premium, authenticité, mesures).
-- 8 à 12 hashtags pertinents sans le caractère #.
+- Adapte le ton au format demandé :
+  * Vinted : concis, mots-clés, hashtags utiles.
+  * Leboncoin : annonce classique, aucun hashtag dans la description, ton local et pratique.
+  * Vestiaire Collective : premium, axé sur la composition exacte, la marque, l'authenticité et l'état détaillé, aucun hashtag.
+- 8 à 12 hashtags pertinents sans le caractère # (ils ne seront utilisés que pour Vinted).
 
 Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, au format :
-{"type":"","brand":"","color":"","fit":"","material":"","size":"","condition":"","defects":[],"parcel":"Petit|Moyen|Grand","parcelNote":"","prices":{"quick":0,"recommended":0,"max":0},"title":"","description":"","hashtags":[]}`;
+{"type":"","category":"","subcategory":"","brand":"","color":"","fit":"","material":"","size":"","condition":"","defects":[],"parcel":"Petit|Moyen|Grand","parcelNote":"","prices":{"quick":0,"recommended":0,"max":0},"title":"","description":"","hashtags":[]}`;
 
 export const analyzeGarment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
