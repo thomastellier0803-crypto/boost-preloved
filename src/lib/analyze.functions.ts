@@ -11,6 +11,29 @@ const inputSchema = z.object({
   condition: z.string().optional(),
 });
 
+const outputSchema = z.object({
+  type: z.string().default(""),
+  brand: z.string().default(""),
+  color: z.string().default(""),
+  fit: z.string().default(""),
+  material: z.string().default(""),
+  size: z.string().default(""),
+  condition: z.string().default(""),
+  defects: z.array(z.string()).default([]),
+  parcel: z.string().default("Moyen"),
+  parcelNote: z.string().default(""),
+  prices: z
+    .object({
+      quick: z.number().default(0),
+      recommended: z.number().default(0),
+      max: z.number().default(0),
+    })
+    .default({ quick: 0, recommended: 0, max: 0 }),
+  title: z.string().default(""),
+  description: z.string().default(""),
+  hashtags: z.array(z.string()).default([]),
+});
+
 const SYSTEM = `Tu es un expert de la revente de vêtements d'occasion en France (Vinted, Leboncoin, Vestiaire Collective).
 Tu analyses des photos de vêtements et tu produis une fiche d'annonce prête à publier.
 
@@ -80,5 +103,5 @@ export const analyzeGarment = createServerFn({ method: "POST" })
     const raw = json.choices?.[0]?.message?.content ?? "";
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error("Réponse IA illisible");
-    return JSON.parse(match[0]) as Record<string, unknown>;
+    return outputSchema.parse(JSON.parse(match[0]));
   });
