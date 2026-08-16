@@ -11,10 +11,10 @@ export function AppHeader({
   credits?: { used: number; quota: number };
 }) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur">
-      <div className="app-container flex items-center justify-between gap-3 py-3">
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/70 backdrop-blur-xl">
+      <div className="app-container flex items-center justify-between gap-3 py-3.5">
         <div className="min-w-0">
-          <h1 className="truncate text-lg font-semibold tracking-tight">{title}</h1>
+          <h1 className="truncate text-xl font-bold tracking-tight">{title}</h1>
           {subtitle ? (
             <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
           ) : null}
@@ -22,9 +22,9 @@ export function AppHeader({
         {credits ? (
           <Link
             to="/pro"
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-accent px-3 py-1.5 text-xs font-semibold text-accent-foreground shadow-card transition-transform active:scale-95"
           >
-            <Zap className="size-3.5 text-primary" strokeWidth={2} />
+            <Zap className="size-3.5 text-primary" strokeWidth={2.25} />
             {Math.max(0, credits.quota - credits.used)} / {credits.quota}
           </Link>
         ) : null}
