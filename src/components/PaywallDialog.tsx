@@ -1,5 +1,5 @@
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check, Crown } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -24,27 +24,41 @@ export function PaywallDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-sm rounded-3xl">
         <DialogHeader>
-          <DialogTitle>ResellBoost Pro</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Crown className="size-4 text-primary" />
+            ResellBoost Pro
+          </DialogTitle>
           <DialogDescription>
             Vous avez utilisé vos 3 annonces gratuites du jour.
           </DialogDescription>
         </DialogHeader>
-        <div className="rounded-xl border border-border bg-muted/50 p-4">
-          <p className="text-2xl font-semibold tracking-tight">
-            4,99 € <span className="text-sm font-normal text-muted-foreground">/ mois</span>
+        <div
+          className="sheen relative overflow-hidden rounded-2xl p-5"
+          style={{ background: "var(--gradient-brand)" }}
+        >
+          <p className="text-3xl font-bold tracking-tight text-white">
+            4,99 € <span className="text-sm font-medium text-white/80">/ mois</span>
           </p>
           <ul className="mt-3 space-y-2">
             {perks.map((perk) => (
-              <li key={perk} className="flex items-start gap-2 text-sm">
-                <Check className="mt-0.5 size-4 shrink-0 text-primary" />
+              <li key={perk} className="flex items-start gap-2 text-sm text-white">
+                <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-white/25">
+                  <Check className="size-3 text-white" strokeWidth={3} />
+                </span>
                 {perk}
               </li>
             ))}
           </ul>
         </div>
-        <Button className="w-full">Passer à Pro</Button>
+        <button
+          type="button"
+          onClick={() => toast.info("Paiement bientôt disponible")}
+          className="cta-glow pulse-glow w-full rounded-2xl py-3.5 text-sm font-bold"
+        >
+          Passer à Pro
+        </button>
         <button
           type="button"
           onClick={() => onOpenChange(false)}

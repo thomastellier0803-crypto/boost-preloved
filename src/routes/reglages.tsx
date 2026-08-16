@@ -1,19 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { KeyRound, Moon, ShieldCheck, Sun, SunMoon, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Chip } from "@/components/Chip";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { ShieldCheck } from "lucide-react";
 import {
   applyTheme,
   clearHistory,
@@ -41,10 +33,33 @@ export const Route = createFileRoute("/reglages")({
         property: "og:description",
         content: "Personnalisez ResellBoost AI et gérez vos données enregistrées.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SettingsPage,
 });
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-2">
+      <p className="px-1 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+        {title}
+      </p>
+      <div className="glass-card divide-y divide-border overflow-hidden">{children}</div>
+    </section>
+  );
+}
+
+function Row({ children }: { children: React.ReactNode }) {
+  return <div className="space-y-2 p-4">{children}</div>;
+}
+
+const THEMES = [
+  { value: "system", label: "Système", icon: SunMoon },
+  { value: "light", label: "Clair", icon: Sun },
+  { value: "dark", label: "Sombre", icon: Moon },
+] as const;
 
 function SettingsPage() {
   const [prefs, setLocalPrefs] = useState<Prefs>(defaultPrefs);
@@ -68,63 +83,58 @@ function SettingsPage() {
   return (
     <div className="pb-6">
       <AppHeader title="Réglages" subtitle="Préférences et données" />
-      <div className="app-container space-y-5 py-5">
-        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Affichage
-          </p>
-          <div className="space-y-1.5">
-            <Label>Thème</Label>
-            <Select value={prefs.theme} onValueChange={(v) => update({ theme: v as Prefs["theme"] })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="system">Système</SelectItem>
-                <SelectItem value="light">Clair</SelectItem>
-                <SelectItem value="dark">Sombre</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </section>
+      <div className="app-container space-y-6 py-5">
+        <Section title="Affichage">
+          <Row>
+            <p className="text-sm font-medium">Thème</p>
+            <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1">
+              {THEMES.map(({ value, label, icon: Icon }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => update({ theme: value })}
+                  className={
+                    prefs.theme === value
+                      ? "cta-glow flex items-center justify-center gap-1.5 rounded-full py-2 text-xs font-semibold"
+                      : "flex items-center justify-center gap-1.5 rounded-full py-2 text-xs font-medium text-muted-foreground"
+                  }
+                >
+                  <Icon className="size-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </Row>
+        </Section>
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Préférences par défaut
-          </p>
-          <div className="space-y-1.5">
-            <Label>Plateforme</Label>
-            <Select value={prefs.platform} onValueChange={(v) => update({ platform: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PLATFORMS.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {p}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>État par défaut</Label>
-            <Select value={prefs.condition} onValueChange={(v) => update({ condition: v })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CONDITIONS.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-between gap-4">
+        <Section title="Préférences">
+          <Row>
+            <p className="text-sm font-medium">Plateforme par défaut</p>
+            <div className="flex flex-wrap gap-2">
+              {PLATFORMS.map((p) => (
+                <Chip key={p} active={prefs.platform === p} onClick={() => update({ platform: p })}>
+                  {p}
+                </Chip>
+              ))}
+            </div>
+          </Row>
+          <Row>
+            <p className="text-sm font-medium">État par défaut</p>
+            <div className="flex flex-wrap gap-2">
+              {CONDITIONS.map((c) => (
+                <Chip
+                  key={c}
+                  active={prefs.condition === c}
+                  onClick={() => update({ condition: c })}
+                >
+                  {c}
+                </Chip>
+              ))}
+            </div>
+          </Row>
+          <div className="flex items-center justify-between gap-4 p-4">
             <div>
-              <Label>Descriptions sans emoji</Label>
+              <p className="text-sm font-medium">Descriptions sans emoji</p>
               <p className="text-xs text-muted-foreground">Texte sobre et professionnel</p>
             </div>
             <Switch
@@ -132,21 +142,18 @@ function SettingsPage() {
               onCheckedChange={(checked) => update({ noEmoji: checked })}
             />
           </div>
-        </section>
+        </Section>
 
-        <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Mode créateur
-          </p>
+        <Section title="Créateur">
           {creator ? (
-            <>
-              <div className="flex items-center gap-2 rounded-lg border border-primary bg-accent p-3 text-sm font-medium">
-                <ShieldCheck className="size-4 text-primary" />
-                Créateur Pro actif — générations illimitées
+            <Row>
+              <div className="flex items-center gap-2 rounded-2xl bg-success/15 p-3 text-sm font-semibold text-success">
+                <ShieldCheck className="size-4" />
+                Créateur Pro Illimité actif
               </div>
-              <Button
-                variant="outline"
-                className="w-full"
+              <button
+                type="button"
+                className="mt-1 w-full rounded-2xl border border-border py-3 text-sm font-medium transition-colors hover:bg-muted"
                 onClick={() => {
                   setCreator(false);
                   setCreatorState(false);
@@ -154,12 +161,13 @@ function SettingsPage() {
                 }}
               >
                 Désactiver le mode créateur
-              </Button>
-            </>
+              </button>
+            </Row>
           ) : (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="admin-code">Code Administrateur</Label>
+            <Row>
+              <p className="text-sm font-medium">Code Administrateur</p>
+              <div className="relative">
+                <KeyRound className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary" />
                 <Input
                   id="admin-code"
                   type="password"
@@ -168,46 +176,48 @@ function SettingsPage() {
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="Saisir le code"
+                  className="h-12 rounded-2xl bg-card pl-11 tracking-[0.25em] shadow-card"
                 />
               </div>
-              <Button
-                className="w-full"
+              <button
+                type="button"
+                className="cta-glow mt-1 w-full rounded-2xl py-3 text-sm font-semibold"
                 onClick={() => {
                   if (code.trim() === CREATOR_CODE) {
                     setCreator(true);
                     setCreatorState(true);
                     setCode("");
-                    toast.success("Statut Créateur Pro activé");
+                    toast.success("Mode Créateur Débloqué !");
                   } else {
                     toast.error("Code administrateur invalide");
                   }
                 }}
               >
                 Valider le code
-              </Button>
-            </>
+              </button>
+            </Row>
           )}
-        </section>
+        </Section>
 
-        <section className="space-y-3 rounded-xl border border-border bg-card p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Données
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {count} annonce(s) stockée(s) localement sur cet appareil.
-          </p>
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              clearHistory();
-              setCount(0);
-              toast.success("Historique effacé");
-            }}
-          >
-            Effacer l'historique
-          </Button>
-        </section>
+        <Section title="Données">
+          <Row>
+            <p className="text-sm text-muted-foreground">
+              {count} annonce(s) stockée(s) localement sur cet appareil.
+            </p>
+            <button
+              type="button"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-destructive/40 py-3 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
+              onClick={() => {
+                clearHistory();
+                setCount(0);
+                toast.success("Historique effacé");
+              }}
+            >
+              <Trash2 className="size-4" />
+              Effacer l'historique
+            </button>
+          </Row>
+        </Section>
       </div>
     </div>
   );

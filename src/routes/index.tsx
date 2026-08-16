@@ -1,22 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Wand2 } from "lucide-react";
+import { Check, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { BrandCombobox } from "@/components/BrandCombobox";
+import { Chip, ChipGroup } from "@/components/Chip";
 import { PaywallDialog } from "@/components/PaywallDialog";
 import { PhotoUploader, type Photos } from "@/components/PhotoUploader";
 import { ResultPanel } from "@/components/ResultPanel";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { analyzeGarment } from "@/lib/analyze.functions";
 import {
   CATEGORIES,
@@ -52,6 +44,8 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Analyse photo IA et estimation de prix pour la revente de vêtements d'occasion.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: Scanner,
@@ -62,6 +56,47 @@ const LOADING_STEPS = [
   "Détection de la marque, taille et composition...",
   "Estimation des prix sur le marché d'occasion...",
 ];
+
+function SegmentedPlatforms({
+  value,
+  onChange,
+}: {
+  value: Platform;
+  onChange: (p: Platform) => void;
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1">
+      {PLATFORMS.map((p) => (
+        <button
+          key={p}
+          type="button"
+          onClick={() => onChange(p)}
+          className={
+            value === p
+              ? "cta-glow rounded-full px-2 py-2 text-[11px] font-semibold"
+              : "rounded-full px-2 py-2 text-[11px] font-medium text-muted-foreground transition-colors"
+          }
+        >
+          {p === "Vestiaire Collective" ? "Vestiaire" : p}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ResultSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-3 gap-2">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="shimmer h-20 rounded-2xl" />
+        ))}
+      </div>
+      <div className="shimmer h-40 rounded-2xl" />
+      <div className="shimmer h-56 rounded-2xl" />
+    </div>
+  );
+}
 
 function Scanner() {
   const analyze = useServerFn(analyzeGarment);
@@ -89,8 +124,7 @@ function Scanner() {
   }, []);
 
   const images = Object.values(photos).filter(Boolean) as string[];
-  const baseSizes =
-    category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
+  const baseSizes = category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
   const sizeOptions = size && !baseSizes.includes(size) ? [size, ...baseSizes] : baseSizes;
 
   async function run() {
@@ -104,17 +138,12 @@ function Scanner() {
     }
     setLoading(true);
     setStep(0);
-    const timers = [
-      setTimeout(() => setStep(1), 2500),
-      setTimeout(() => setStep(2), 6000),
-    ];
+    const timers = [setTimeout(() => setStep(1), 2500), setTimeout(() => setStep(2), 6000)];
     try {
       const data = await analyze({
         data: { images, platform, brand, category, subcategory, size, condition },
       });
-      const parcel = (["Petit", "Moyen", "Grand"] as const).includes(
-        data.parcel as "Petit",
-      )
+      const parcel = (["Petit", "Moyen", "Grand"] as const).includes(data.parcel as "Petit")
         ? (data.parcel as AnalysisResult["parcel"])
         : "Moyen";
       const next: AnalysisResult = { ...data, parcel, platform };
@@ -137,7 +166,7 @@ function Scanner() {
         createdAt: Date.now(),
         thumbnail: images[0],
       });
-      toast.success("Annonce générée");
+      toast.success("Annonce générée et sauvegardée");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Analyse impossible");
     } finally {
@@ -157,145 +186,131 @@ function Scanner() {
       <div className="app-container space-y-6 py-5">
         <PhotoUploader photos={photos} onChange={setPhotos} />
 
-        <div className="space-y-4 rounded-xl border border-border bg-card p-4">
-          <div className="space-y-1.5">
-            <Label>Marque</Label>
+        <div className="glass-card space-y-5 p-4">
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Marque
+            </p>
             <BrandCombobox value={brand} onChange={setBrand} />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Catégorie</Label>
-              <Select
-                value={category}
-                onValueChange={(v) => {
-                  setCategory(v);
+          <ChipGroup label="Catégorie">
+            {Object.keys(CATEGORIES).map((c) => (
+              <Chip
+                key={c}
+                active={category === c}
+                onClick={() => {
+                  setCategory(category === c ? "" : c);
                   setSubcategory("");
                   setSize("");
                 }}
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.keys(CATEGORIES).map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Sous-catégorie</Label>
-              <Select value={subcategory} onValueChange={setSubcategory} disabled={!category}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(CATEGORIES[category] ?? []).map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Taille</Label>
-              <Select value={size} onValueChange={setSize}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sizeOptions.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>État</Label>
-              <Select value={condition} onValueChange={setCondition}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CONDITIONS.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {c}
+              </Chip>
+            ))}
+          </ChipGroup>
+
+          {category ? (
+            <ChipGroup label="Sous-catégorie">
+              {(CATEGORIES[category] ?? []).map((s) => (
+                <Chip
+                  key={s}
+                  active={subcategory === s}
+                  onClick={() => setSubcategory(subcategory === s ? "" : s)}
+                >
+                  {s}
+                </Chip>
+              ))}
+            </ChipGroup>
+          ) : null}
+
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Taille
+            </p>
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+              {sizeOptions.map((s) => (
+                <Chip
+                  key={s}
+                  active={size === s}
+                  onClick={() => setSize(size === s ? "" : s)}
+                  className="shrink-0 whitespace-nowrap"
+                >
+                  {s}
+                </Chip>
+              ))}
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Format d'annonce</Label>
-            <div className="grid grid-cols-3 gap-2">
-              {PLATFORMS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPlatform(p)}
-                  className={
-                    platform === p
-                      ? "rounded-lg border border-primary bg-accent px-2 py-2 text-xs font-medium text-accent-foreground"
-                      : "rounded-lg border border-border bg-background px-2 py-2 text-xs font-medium text-muted-foreground"
-                  }
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+          <ChipGroup label="État">
+            {CONDITIONS.map((c) => (
+              <Chip key={c} active={condition === c} onClick={() => setCondition(c)}>
+                {c}
+              </Chip>
+            ))}
+          </ChipGroup>
+
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Format d'annonce
+            </p>
+            <SegmentedPlatforms value={platform} onChange={setPlatform} />
           </div>
         </div>
 
-        <Button className="w-full gap-2" size="lg" onClick={run} disabled={loading}>
+        <button
+          type="button"
+          onClick={run}
+          disabled={loading}
+          className="cta-glow flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold disabled:opacity-70"
+        >
           {loading ? (
-            <Loader2 className="size-4 animate-spin" />
+            <Loader2 className="size-5 animate-spin" />
           ) : (
-            <Wand2 className="size-4" />
+            <Sparkles className="size-5" />
           )}
           {loading ? "Analyse en cours" : "Analyser et générer"}
-        </Button>
+        </button>
 
         {loading ? (
-          <div className="rounded-xl border border-border bg-card p-4">
-            <div className="space-y-2">
-              {LOADING_STEPS.map((label, i) => (
+          <div className="space-y-4">
+            <div className="glass-card p-4">
+              <div className="space-y-2.5">
+                {LOADING_STEPS.map((label, i) => (
+                  <div
+                    key={label}
+                    className={
+                      i <= step
+                        ? "flex items-center gap-2 text-sm font-medium"
+                        : "flex items-center gap-2 text-sm text-muted-foreground"
+                    }
+                  >
+                    {i < step ? (
+                      <Check className="size-4 text-primary" />
+                    ) : i === step ? (
+                      <Loader2 className="size-4 animate-spin text-primary" />
+                    ) : (
+                      <span className="size-4" />
+                    )}
+                    {label}
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                 <div
-                  key={label}
-                  className={
-                    i <= step
-                      ? "flex items-center gap-2 text-sm font-medium"
-                      : "flex items-center gap-2 text-sm text-muted-foreground"
-                  }
-                >
-                  {i < step ? (
-                    <Check className="size-4 text-primary" />
-                  ) : i === step ? (
-                    <Loader2 className="size-4 animate-spin text-primary" />
-                  ) : (
-                    <span className="size-4" />
-                  )}
-                  {label}
-                </div>
-              ))}
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${((step + 1) / LOADING_STEPS.length) * 100}%`,
+                    background: "var(--gradient-brand)",
+                  }}
+                />
+              </div>
             </div>
-            <div className="mt-3 h-1 overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-700"
-                style={{ width: `${((step + 1) / LOADING_STEPS.length) * 100}%` }}
-              />
-            </div>
+            <ResultSkeleton />
           </div>
         ) : null}
 
-        {result ? <ResultPanel result={result} /> : null}
+        {!loading && result ? <ResultPanel result={result} /> : null}
       </div>
       <PaywallDialog open={paywall} onOpenChange={setPaywall} />
     </div>

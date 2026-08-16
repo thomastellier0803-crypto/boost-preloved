@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Copy, Check, Package, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +33,7 @@ function CopyButton({
         } catch {
           /* ignore */
         }
+        toast.success("Copié dans le presse-papier");
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
@@ -74,11 +76,11 @@ export function ResultPanel({ result }: { result: AnalysisResult }) {
             key={card.key}
             className={
               card.key === "recommended"
-                ? "rounded-xl border border-primary bg-accent p-3 text-center"
-                : "rounded-xl border border-border bg-card p-3 text-center"
+                ? "rounded-2xl border border-primary/40 bg-accent p-3 text-center shadow-glow"
+                : "glass-card p-3 text-center"
             }
           >
-            <p className="text-lg font-semibold tracking-tight">
+            <p className="text-xl font-bold tracking-tight">
               {result.prices[card.key]} €
             </p>
             <p className="mt-0.5 text-[11px] font-medium">{card.title}</p>
@@ -87,7 +89,7 @@ export function ResultPanel({ result }: { result: AnalysisResult }) {
         ))}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-4">
+      <div className="glass-card p-4">
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           {[
             ["Type", result.type],
@@ -119,7 +121,7 @@ export function ResultPanel({ result }: { result: AnalysisResult }) {
         ) : null}
       </div>
 
-      <div className="space-y-4 rounded-xl border border-border bg-card p-4">
+      <div className="glass-card space-y-4 p-4">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           Annonce {platform} — modifiable
         </p>
@@ -153,7 +155,7 @@ export function ResultPanel({ result }: { result: AnalysisResult }) {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <CopyButton label="Copier le titre" value={title} />
         <CopyButton label="Copier la description" value={description} />
         {withHashtags ? <CopyButton label="Copier les hashtags" value={hashtags} /> : null}
