@@ -9,6 +9,7 @@ import { Chip, ChipGroup } from "@/components/Chip";
 import { PaywallDialog } from "@/components/PaywallDialog";
 import { PhotoUploader, type Photos } from "@/components/PhotoUploader";
 import { ResultPanel } from "@/components/ResultPanel";
+import { analyzeGarment } from "@/lib/analyze.functions";
 import {
   CATEGORIES,
   CONDITIONS,
