@@ -11,7 +11,7 @@ const items = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-card/80 backdrop-blur-xl">
       <ul className="mx-auto flex max-w-lg items-stretch">
         {items.map(({ to, label, icon: Icon }) => (
           <li key={to} className="flex-1">
@@ -19,9 +19,11 @@ export function BottomNav() {
               to={to}
               activeOptions={{ exact: to === "/" }}
               activeProps={{ "data-active": "true" }}
-              className="flex flex-col items-center gap-1 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2.5 text-[11px] font-medium text-muted-foreground transition-colors data-[active=true]:text-primary"
+              className="group flex flex-col items-center gap-1 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 text-[10px] font-medium text-muted-foreground transition-colors data-[active=true]:text-primary"
             >
-              <Icon className="size-5" strokeWidth={1.75} />
+              <span className="flex h-8 w-12 items-center justify-center rounded-full transition-all group-data-[active=true]:bg-accent">
+                <Icon className="size-5 transition-transform group-data-[active=true]:scale-110" strokeWidth={1.9} />
+              </span>
               {label}
             </Link>
           </li>
