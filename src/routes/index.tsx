@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Sparkles } from "lucide-react";
+import { Check, Lightbulb, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { BrandCombobox } from "@/components/BrandCombobox";
@@ -124,6 +124,23 @@ function Scanner() {
   }, []);
 
   const images = Object.values(photos).filter(Boolean) as string[];
+  const showWearAlert = Boolean(result?.wearDetected) && condition !== "Satisfaisant";
+  const adjustedPrice = result ? Math.max(3, Math.round(result.prices.recommended * 0.75)) : 0;
+
+  function applyRecommendation() {
+    if (!result) return;
+    setCondition("Satisfaisant");
+    setResult({
+      ...result,
+      condition: "Satisfaisant",
+      prices: {
+        quick: Math.max(2, Math.round(adjustedPrice * 0.7)),
+        recommended: adjustedPrice,
+        max: Math.max(adjustedPrice + 2, Math.round(adjustedPrice * 1.3)),
+      },
+    });
+    toast.success("État et prix ajustés");
+  }
   const baseSizes = category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
   const sizeOptions = size && !baseSizes.includes(size) ? [size, ...baseSizes] : baseSizes;
 
@@ -249,6 +266,31 @@ function Scanner() {
               </Chip>
             ))}
           </ChipGroup>
+
+          {showWearAlert && result ? (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3.5">
+              <div className="flex gap-2.5">
+                <Lightbulb className="mt-0.5 size-4 shrink-0 text-destructive" />
+                <div className="space-y-2">
+                  <p className="text-xs leading-relaxed">
+                    <span className="font-semibold">Conseil Vendeur IA :</span> l'IA détecte une
+                    usure visuelle sur le tissu
+                    {result.wearNote ? ` (${result.wearNote})` : ""}. Pour éviter un litige Vinted
+                    ou une note 1 étoile, nous vous conseillons l'État satisfaisant (prix ajusté
+                    conseillé : {adjustedPrice} €).
+                  </p>
+                  <button
+                    type="button"
+                    onClick={applyRecommendation}
+                    className="rounded-full bg-destructive px-3.5 py-1.5 text-[11px] font-semibold text-destructive-foreground"
+                  >
+                    Appliquer la recommandation
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
 
           <div className="space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">

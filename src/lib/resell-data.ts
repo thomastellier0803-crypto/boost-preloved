@@ -127,6 +127,9 @@ export type AnalysisResult = {
   size: string;
   condition: string;
   defects: string[];
+  wearDetected?: boolean;
+  wearNote?: string;
+  suggestedCondition?: string;
   parcel: "Petit" | "Moyen" | "Grand";
   parcelNote: string;
   prices: { quick: number; recommended: number; max: number };
