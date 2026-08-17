@@ -124,7 +124,7 @@ function MarginPage() {
           }}
         >
           <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
-            Gain net
+            Gain net estimé dans ta poche
           </p>
           <p className="mt-1 text-5xl font-bold tracking-tight text-white">
             {net.toFixed(2)} €
@@ -155,8 +155,9 @@ function MarginPage() {
         </div>
 
         <div className="rounded-2xl border border-border bg-muted/50 p-4 text-xs text-muted-foreground">
-          Sur Vinted, l'acheteur paie les frais de protection et la livraison. Renseignez les frais
-          uniquement si vous offrez le port ou vendez sur une plateforme à commission.
+          Sur Vinted, l'acheteur paie les frais de protection et la livraison : ce que tu affiches
+          est en général ce que tu touches. Renseigne des frais uniquement si tu offres le port ou
+          si tu vends sur une plateforme à commission.
         </div>
       </div>
     </div>
