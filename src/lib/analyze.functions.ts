@@ -74,7 +74,7 @@ RÉDACTION :
 - 8 à 12 hashtags pertinents sans le caractère # (ils ne seront utilisés que pour Vinted).
 
 Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, au format :
-{"type":"","category":"","subcategory":"","brand":"","color":"","fit":"","material":"","size":"","condition":"","defects":[],"parcel":"Petit|Moyen|Grand","parcelNote":"","prices":{"quick":0,"recommended":0,"max":0},"title":"","description":"","hashtags":[]}`;
+{"type":"","category":"","subcategory":"","brand":"","color":"","fit":"","material":"","size":"","condition":"","defects":[],"wearDetected":false,"wearNote":"","suggestedCondition":"","parcel":"Petit|Moyen|Grand","parcelNote":"","prices":{"quick":0,"recommended":0,"max":0},"title":"","description":"","hashtags":[]}`;
 
 export const analyzeGarment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
