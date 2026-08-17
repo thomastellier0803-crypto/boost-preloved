@@ -60,24 +60,50 @@ function MoneyField({
   );
 }
 
+const SPEED_PRESETS = [
+  { key: "quick", label: "Vente rapide 48h", price: "3" },
+  { key: "avg", label: "Prix moyen Vinted", price: "5" },
+  { key: "high", label: "Prix fort", price: "7" },
+] as const;
+
 function MarginPage() {
-  const [buy, setBuy] = useState("");
   const [sell, setSell] = useState("");
   const [fees, setFees] = useState("");
   const [shipping, setShipping] = useState("");
 
   const n = (v: string) => (Number.isFinite(parseFloat(v)) ? parseFloat(v) : 0);
-  const net = n(sell) - n(buy) - n(fees) - n(shipping);
+  const net = n(sell) - n(fees) - n(shipping);
   const margin = n(sell) > 0 ? (net / n(sell)) * 100 : 0;
   const gauge = Math.max(0, Math.min(100, margin));
   const positive = net >= 0;
 
   return (
     <div className="pb-6">
-      <AppHeader title="Marge" subtitle="Bénéfice net par article" />
+      <AppHeader title="Marge" subtitle="Ce qu'il te reste vraiment" />
       <div className="app-container space-y-5 py-5">
         <div className="glass-card space-y-4 p-4">
-          <MoneyField label="Prix d'achat" value={buy} onChange={setBuy} tone="cost" />
+          <div className="space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Vitesse de vente
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {SPEED_PRESETS.map((p) => (
+                <button
+                  key={p.key}
+                  type="button"
+                  onClick={() => setSell(p.price)}
+                  className={
+                    sell === p.price
+                      ? "cta-glow rounded-2xl px-2 py-2.5 text-[11px] font-semibold leading-tight"
+                      : "rounded-2xl border border-border bg-card px-2 py-2.5 text-[11px] font-medium leading-tight text-muted-foreground"
+                  }
+                >
+                  {p.label}
+                  <span className="mt-0.5 block text-sm font-bold">{p.price} €</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <MoneyField label="Prix de vente" value={sell} onChange={setSell} />
           <MoneyField label="Frais de plateforme" value={fees} onChange={setFees} tone="cost" />
           <MoneyField
@@ -87,6 +113,7 @@ function MarginPage() {
             tone="cost"
           />
         </div>
+
 
         <div
           className="relative overflow-hidden rounded-3xl p-6 text-center shadow-card"
