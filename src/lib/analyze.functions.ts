@@ -22,6 +22,9 @@ const outputSchema = z.object({
   size: z.string().default(""),
   condition: z.string().default(""),
   defects: z.array(z.string()).default([]),
+  wearDetected: z.boolean().default(false),
+  wearNote: z.string().default(""),
+  suggestedCondition: z.string().default(""),
   parcel: z.string().default("Moyen"),
   parcelNote: z.string().default(""),
   prices: z
