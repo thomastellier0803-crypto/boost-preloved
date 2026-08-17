@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { Check, Loader2, Sparkles } from "lucide-react";
+import { Check, Lightbulb, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { BrandCombobox } from "@/components/BrandCombobox";
@@ -124,6 +124,23 @@ function Scanner() {
   }, []);
 
   const images = Object.values(photos).filter(Boolean) as string[];
+  const showWearAlert = Boolean(result?.wearDetected) && condition !== "Satisfaisant";
+  const adjustedPrice = result ? Math.max(3, Math.round(result.prices.recommended * 0.75)) : 0;
+
+  function applyRecommendation() {
+    if (!result) return;
+    setCondition("Satisfaisant");
+    setResult({
+      ...result,
+      condition: "Satisfaisant",
+      prices: {
+        quick: Math.max(2, Math.round(adjustedPrice * 0.7)),
+        recommended: adjustedPrice,
+        max: Math.max(adjustedPrice + 2, Math.round(adjustedPrice * 1.3)),
+      },
+    });
+    toast.success("État et prix ajustés");
+  }
   const baseSizes = category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
   const sizeOptions = size && !baseSizes.includes(size) ? [size, ...baseSizes] : baseSizes;
 
