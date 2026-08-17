@@ -1,10 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Trash2, Copy, Check, PackageOpen, Camera } from "lucide-react";
+import {
+  Search,
+  Trash2,
+  Copy,
+  Check,
+  PackageOpen,
+  Camera,
+  Lightbulb,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { Input } from "@/components/ui/input";
 import { Chip } from "@/components/Chip";
+import { ResultPanel } from "@/components/ResultPanel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { getHistory, removeHistory } from "@/lib/local-store";
 import { PLATFORMS, type HistoryItem } from "@/lib/resell-data";
 
@@ -28,12 +44,26 @@ export const Route = createFileRoute("/historique")({
   component: HistoryPage,
 });
 
+function platformTip(platform: string) {
+  switch (platform) {
+    case "Leboncoin":
+      return "Soyez réactif aux messages et proposez un envoi suivi ou une remise en main propre.";
+    case "Vestiaire Collective":
+      return "Mettez en avant l'authenticité, la composition et l'état général du vêtement.";
+    case "Vinted":
+    default:
+      return "Prenez des photos en lumière naturelle et renseignez bien la marque et l'état.";
+  }
+}
+
 function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [ready, setReady] = useState(false);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<string>("Tous");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     setItems(getHistory());
@@ -48,6 +78,16 @@ function HistoryPage() {
         (!q || `${i.title} ${i.brand} ${i.type} ${i.color}`.toLowerCase().includes(q)),
     );
   }, [items, query, filter]);
+
+  function openDetail(item: HistoryItem) {
+    setSelectedItem(item);
+    setDialogOpen(true);
+  }
+
+  function closeDetail() {
+    setDialogOpen(false);
+    setTimeout(() => setSelectedItem(null), 200);
+  }
 
   return (
     <div className="pb-6">
@@ -101,83 +141,144 @@ function HistoryPage() {
           </div>
         ) : (
           <ul className="space-y-3">
-            {filtered.map((item) => {
-              const upside = item.prices.max - item.prices.recommended;
-              return (
-                <li key={item.id} className="glass-card flex gap-3 p-3">
-                  {item.thumbnail ? (
-                    <img
-                      src={item.thumbnail}
-                      alt={item.title}
-                      className="size-20 shrink-0 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="size-20 shrink-0 rounded-xl bg-muted" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="truncate text-sm font-semibold">{item.title}</p>
-                      <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
-                        {item.platform === "Vestiaire Collective" ? "Vestiaire" : item.platform}
-                      </span>
-                    </div>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="text-lg font-semibold tracking-tight">
-                        {item.prices.recommended} €
-                      </span>
-                      <span
-                        className={
-                          upside > 0
-                            ? "rounded-full bg-success/15 px-2 py-0.5 text-[11px] font-semibold text-success"
-                            : "rounded-full bg-destructive/15 px-2 py-0.5 text-[11px] font-semibold text-destructive"
-                        }
-                      >
-                        {upside > 0 ? `+${upside} € max` : "prix plafond"}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground">
-                      {new Date(item.createdAt).toLocaleDateString("fr-FR")} · Colis {item.parcel}
-                    </p>
-                    <div className="mt-2 flex gap-3">
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 text-xs font-semibold text-primary"
-                        onClick={async () => {
-                          await navigator.clipboard.writeText(
-                            `${item.title}\n\n${item.description}`,
-                          );
-                          setCopiedId(item.id);
-                          toast.success("Copié dans le presse-papier");
-                          setTimeout(() => setCopiedId(null), 1600);
-                        }}
-                      >
-                        {copiedId === item.id ? (
-                          <Check className="size-3.5" />
-                        ) : (
-                          <Copy className="size-3.5" />
-                        )}
-                        {copiedId === item.id ? "Copié !" : "Copier"}
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center gap-1 text-xs font-medium text-muted-foreground"
-                        onClick={() => {
-                          removeHistory(item.id);
-                          setItems(getHistory());
-                          toast.success("Annonce supprimée");
-                        }}
-                      >
-                        <Trash2 className="size-3.5" />
-                        Supprimer
-                      </button>
-                    </div>
+            {filtered.map((item) => (
+              <li
+                key={item.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`Ouvrir le détail de ${item.title}`}
+                className="glass-card flex cursor-pointer gap-3 p-3 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                onClick={() => openDetail(item)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    openDetail(item);
+                  }
+                }}
+              >
+                {item.thumbnail ? (
+                  <img
+                    src={item.thumbnail}
+                    alt={item.title}
+                    className="size-20 shrink-0 rounded-xl object-cover"
+                  />
+                ) : (
+                  <div className="size-20 shrink-0 rounded-xl bg-muted" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="truncate text-sm font-semibold">{item.title}</p>
+                    <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
+                      {item.platform === "Vestiaire Collective" ? "Vestiaire" : item.platform}
+                    </span>
                   </div>
-                </li>
-              );
-            })}
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-lg font-semibold tracking-tight">
+                      {item.prices.recommended} €
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    Cote Vinted estimée : {item.prices.quick} € - {item.prices.max} €
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {new Date(item.createdAt).toLocaleDateString("fr-FR")} · Colis {item.parcel}
+                  </p>
+                  <div className="mt-2 flex gap-3">
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-xs font-semibold text-primary"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        await navigator.clipboard.writeText(
+                          `${item.title}\n\n${item.description}`,
+                        );
+                        setCopiedId(item.id);
+                        toast.success("Copié dans le presse-papier");
+                        setTimeout(() => setCopiedId(null), 1600);
+                      }}
+                    >
+                      {copiedId === item.id ? (
+                        <Check className="size-3.5" />
+                      ) : (
+                        <Copy className="size-3.5" />
+                      )}
+                      {copiedId === item.id ? "Copié !" : "Copier"}
+                    </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-1 text-xs font-medium text-muted-foreground"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeHistory(item.id);
+                        setItems(getHistory());
+                        toast.success("Annonce supprimée");
+                      }}
+                    >
+                      <Trash2 className="size-3.5" />
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent
+          className="max-w-lg w-[calc(100%-2rem)] max-h-[90vh] overflow-y-auto rounded-2xl border-border bg-card p-0"
+          onPointerDownOutside={closeDetail}
+        >
+          {selectedItem && (
+            <>
+              {selectedItem.thumbnail ? (
+                <img
+                  src={selectedItem.thumbnail}
+                  alt={selectedItem.title}
+                  className="h-56 w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-56 w-full items-center justify-center bg-muted">
+                  <PackageOpen className="size-12 text-muted-foreground" strokeWidth={1.5} />
+                </div>
+              )}
+              <div className="px-5 pb-6 pt-2">
+                <DialogHeader className="text-left">
+                  <div className="flex items-start justify-between gap-3">
+                    <DialogTitle className="text-base font-semibold leading-snug">
+                      {selectedItem.title}
+                    </DialogTitle>
+                    <span className="shrink-0 rounded-full bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent-foreground">
+                      {selectedItem.platform === "Vestiaire Collective"
+                        ? "Vestiaire"
+                        : selectedItem.platform}
+                    </span>
+                  </div>
+                  <DialogDescription>
+                    {new Date(selectedItem.createdAt).toLocaleDateString("fr-FR")} · Colis{" "}
+                    {selectedItem.parcel}
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="mt-4">
+                  <ResultPanel result={selectedItem} />
+                </div>
+
+                <div className="mt-5 flex gap-3 rounded-2xl border border-border bg-accent/50 p-4">
+                  <Lightbulb className="mt-0.5 size-5 shrink-0 text-primary" />
+                  <div>
+                    <p className="text-sm font-semibold">Conseil de publication</p>
+                    <p className="text-sm text-muted-foreground">
+                      {platformTip(selectedItem.platform)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
