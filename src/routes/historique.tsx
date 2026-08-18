@@ -22,6 +22,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { getHistory, removeHistory } from "@/lib/local-store";
+import { usePro } from "@/hooks/use-pro";
+import { ProTools } from "@/components/ProTools";
 import { PLATFORMS, type HistoryItem } from "@/lib/resell-data";
 
 export const Route = createFileRoute("/historique")({
@@ -64,6 +66,7 @@ function HistoryPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<HistoryItem | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const pro = usePro();
 
   useEffect(() => {
     setItems(getHistory());
