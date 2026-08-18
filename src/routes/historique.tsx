@@ -82,6 +82,16 @@ function HistoryPage() {
     );
   }, [items, query, filter]);
 
+  const dormant = useMemo(
+    () => items.reduce((sum, i) => sum + i.prices.recommended, 0),
+    [items],
+  );
+
+  function updateSelected(next: HistoryItem) {
+    setSelectedItem(next);
+    setItems(getHistory());
+  }
+
   function openDetail(item: HistoryItem) {
     setSelectedItem(item);
     setDialogOpen(true);
