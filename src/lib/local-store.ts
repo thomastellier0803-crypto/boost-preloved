@@ -36,6 +36,13 @@ export function addHistory(item: HistoryItem) {
   write(HISTORY_KEY, [item, ...getHistory()].slice(0, 100));
 }
 
+export function updateHistory(item: HistoryItem) {
+  write(
+    HISTORY_KEY,
+    getHistory().map((i) => (i.id === item.id ? item : i)),
+  );
+}
+
 export function removeHistory(id: string) {
   write(
     HISTORY_KEY,
