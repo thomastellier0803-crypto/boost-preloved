@@ -1,21 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Crown, Minus, Sparkles } from "lucide-react";
+import { Check, Crown, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
     meta: [
-      { title: "ResellBoost Pro — Annonces illimitées à 4,99 €/mois" },
+      { title: "ResellBoost Pro — Pack à 4,99 €/mois" },
       {
         name: "description",
         content:
-          "Passez à ResellBoost Pro pour générer un nombre illimité d'annonces optimisées et débloquer tous les formats d'export.",
+          "Passez à ResellBoost Pro : Boost SEO, relanceur favoris, alerte anti-litige IA et re-publication automatique.",
       },
-      { property: "og:title", content: "ResellBoost Pro — 4,99 € par mois" },
+      { property: "og:title", content: "ResellBoost Pro — Pack à 4,99 €/mois" },
       {
         property: "og:description",
-        content: "Générations illimitées, analyse prioritaire et historique sans limite.",
+        content: "4 outils exclusifs pour vendre ton stock 3x plus vite.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -24,37 +24,29 @@ export const Route = createFileRoute("/pro")({
   component: ProPage,
 });
 
-const perks = [
-  "Générations d'annonces illimitées",
-  "Analyse photo IA prioritaire",
-  "Export Vinted, Leboncoin et Vestiaire",
-  "Historique illimité et sauvegardé",
-  "Estimation de prix marché avancée",
+const features = [
+  {
+    title: "Boost SEO 100 %",
+    description: "Injection automatique des hashtags de style pour maximiser la visibilité.",
+  },
+  {
+    title: "Relanceur de Favoris Express",
+    description: "Scripts polis prêts à copier + curseur de réduction dynamique (-1 €, -2 €, -5 €).",
+  },
+  {
+    title: "Alerte Anti-Litige IA",
+    description: "Détection d'usure visuelle et protection de ton compte vendeur.",
+  },
+  {
+    title: "Re-publication Anti-Annonce Morte",
+    description: "Reformulation en 1 clic pour remonter ton annonce en tête de fil.",
+  },
 ];
-
-const rows = [
-  { label: "Annonces par jour", free: "3", pro: "Illimité" },
-  { label: "Analyse photo IA", free: true, pro: true },
-  { label: "Estimation de prix marché", free: true, pro: true },
-  { label: "Export Vinted", free: true, pro: true },
-  { label: "Export Leboncoin et Vestiaire", free: false, pro: true },
-  { label: "Historique sauvegardé", free: "20 annonces", pro: "Illimité" },
-  { label: "Analyse prioritaire", free: false, pro: true },
-];
-
-function Cell({ value }: { value: string | boolean }) {
-  if (typeof value === "string") return <span className="text-xs font-semibold">{value}</span>;
-  return value ? (
-    <Check className="mx-auto size-4 text-success" />
-  ) : (
-    <Minus className="mx-auto size-4 text-muted-foreground" />
-  );
-}
 
 function ProPage() {
   return (
     <div className="pb-6">
-      <AppHeader title="Pro" subtitle="Débloquez tout le potentiel" />
+      <AppHeader title="Pro" subtitle="Le pack vendeur 4,99 € / mois" />
       <div className="app-container space-y-5 py-5">
         <div
           className="sheen relative overflow-hidden rounded-3xl p-6 shadow-card"
@@ -62,24 +54,13 @@ function ProPage() {
         >
           <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
             <Crown className="size-3" />
-            Offre recommandée
+            Pack Pro
           </span>
           <p className="mt-3 text-xl font-semibold text-white">ResellBoost Pro</p>
           <p className="mt-1 text-4xl font-bold tracking-tight text-white">
             4,99 € <span className="text-sm font-medium text-white/80">/ mois</span>
           </p>
           <p className="mt-1 text-sm text-white/85">Sans engagement, résiliable à tout moment.</p>
-
-          <ul className="mt-4 space-y-2">
-            {perks.map((perk) => (
-              <li key={perk} className="flex items-start gap-2 text-sm text-white">
-                <span className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-white/25">
-                  <Check className="size-3 text-white" strokeWidth={3} />
-                </span>
-                {perk}
-              </li>
-            ))}
-          </ul>
 
           <button
             type="button"
@@ -91,31 +72,29 @@ function ProPage() {
           </button>
         </div>
 
-        <div className="glass-card overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-[11px] uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-3 text-left font-semibold">Fonctionnalité</th>
-                <th className="px-3 py-3 text-center font-semibold">Gratuit</th>
-                <th className="px-3 py-3 text-center font-semibold text-primary">Pro</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => (
-                <tr key={row.label} className="border-b border-border last:border-0">
-                  <td className="px-4 py-3">{row.label}</td>
-                  <td className="px-3 py-3 text-center">
-                    <Cell value={row.free} />
-                  </td>
-                  <td className="bg-accent/40 px-3 py-3 text-center">
-                    <Cell value={row.pro} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="glass-card space-y-1 p-4">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            4 avantages exclusifs
+          </p>
+          <ul className="mt-3 space-y-3">
+            {features.map((feature) => (
+              <li
+                key={feature.title}
+                className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3"
+              >
+                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success/15">
+                  <Check className="size-3 text-success" strokeWidth={3} />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold">{feature.title}</p>
+                  <p className="text-xs text-muted-foreground">{feature.description}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
   );
 }
+
