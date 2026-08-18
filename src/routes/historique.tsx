@@ -8,6 +8,7 @@ import {
   PackageOpen,
   Camera,
   Lightbulb,
+  Crown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
@@ -305,6 +306,8 @@ function HistoryPage() {
                 <div className="mt-4">
                   <ResultPanel result={selectedItem} />
                 </div>
+
+                <ProTools item={selectedItem} pro={pro} onUpdate={updateSelected} />
 
                 <div className="mt-5 flex gap-3 rounded-2xl border border-border bg-accent/50 p-4">
                   <Lightbulb className="mt-0.5 size-5 shrink-0 text-primary" />
