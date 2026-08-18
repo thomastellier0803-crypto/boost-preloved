@@ -27,8 +27,8 @@ import {
   getCredits,
   getPrefs,
   applyTheme,
-  isCreator,
 } from "@/lib/local-store";
+import { usePro } from "@/hooks/use-pro";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -111,8 +111,8 @@ function Scanner() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [used, setUsed] = useState(0);
   const [paywall, setPaywall] = useState(false);
-  const [creator, setCreator] = useState(false);
   const [step, setStep] = useState(0);
+  const creator = usePro();
 
   useEffect(() => {
     const prefs = getPrefs();
@@ -120,7 +120,6 @@ function Scanner() {
     setPlatform(prefs.platform as Platform);
     setCondition(prefs.condition);
     setUsed(getCredits().used);
-    setCreator(isCreator());
   }, []);
 
   const images = Object.values(photos).filter(Boolean) as string[];
