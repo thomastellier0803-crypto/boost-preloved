@@ -106,6 +106,34 @@ function HistoryPage() {
     <div className="pb-6">
       <AppHeader title="Historique" subtitle={`${items.length} annonce(s) enregistrée(s)`} />
       <div className="app-container space-y-4 py-5">
+        <div className="glass-card p-5">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Capital dormant
+          </p>
+          <p className="mt-1 text-3xl font-bold tracking-tight">
+            {dormant} € <span className="text-sm font-medium">bloqués dans ton armoire</span>
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Total estimé de tes {items.length} article(s) non vendus.
+          </p>
+          {!pro ? (
+            <Link
+              to="/pro"
+              className="mt-4 flex items-center gap-3 rounded-2xl border border-primary/30 bg-accent p-3 transition-transform active:scale-[0.98]"
+            >
+              <Crown className="size-5 shrink-0 text-primary" />
+              <span className="text-xs font-semibold text-accent-foreground">
+                Passe à l'Offre Pro pour débloquer la visibilité SEO et vendre ton stock 3x plus
+                vite.
+              </span>
+            </Link>
+          ) : (
+            <p className="mt-4 rounded-2xl border border-primary/30 bg-accent p-3 text-xs font-semibold text-accent-foreground">
+              Offre Pro active : Boost SEO, Relanceur Favoris et Re-publication débloqués.
+            </p>
+          )}
+        </div>
+
         <div className="relative">
           <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
