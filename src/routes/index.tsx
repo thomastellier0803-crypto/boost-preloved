@@ -27,8 +27,8 @@ import {
   getCredits,
   getPrefs,
   applyTheme,
-  isCreator,
 } from "@/lib/local-store";
+import { usePro } from "@/hooks/use-pro";
 
 export const Route = createFileRoute("/")({
   head: () => ({
