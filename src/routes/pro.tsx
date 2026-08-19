@@ -1,21 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Check, Crown, Sparkles } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Crown,
+  Gem,
+  Layers,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 
 export const Route = createFileRoute("/pro")({
   head: () => ({
     meta: [
-      { title: "ResellBoost Pro — Pack à 4,99 €/mois" },
+      {
+        title:
+          "Rentabilisé dès ta 1ère vente du mois — ResellBoost Pro",
+      },
       {
         name: "description",
         content:
-          "Passez à ResellBoost Pro : Boost SEO, relanceur favoris, alerte anti-litige IA et re-publication automatique.",
+          "Passe à ResellBoost Pro : multi-scan par lot, cross-posting 1-clic, re-publication anti-annonce morte et estimation pépites & marques pour 4,99 €/mois.",
       },
-      { property: "og:title", content: "ResellBoost Pro — Pack à 4,99 €/mois" },
+      {
+        property: "og:title",
+        content: "Rentabilisé dès ta 1ère vente du mois — ResellBoost Pro",
+      },
       {
         property: "og:description",
-        content: "4 outils exclusifs pour vendre ton stock 3x plus vite.",
+        content:
+          "4 outils vendeur pour gagner du temps et doubler tes ventes sur Vinted, Leboncoin et Vestiaire Collective.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -26,28 +40,50 @@ export const Route = createFileRoute("/pro")({
 
 const features = [
   {
-    title: "Boost SEO 100 %",
-    description: "Injection automatique des hashtags de style pour maximiser la visibilité.",
+    icon: Layers,
+    title: "Multi-Scan par lot",
+    description:
+      "Prends jusqu'à 10 vêtements en photo d'affilée. L'IA génère les 10 annonces d'un coup, sans repasser par le scanner (vs 1 par 1 en version gratuite).",
   },
   {
-    title: "Relanceur de Favoris Express",
-    description: "Scripts polis prêts à copier + curseur de réduction dynamique (-1 €, -2 €, -5 €).",
+    icon: ArrowLeftRight,
+    title: "Cross-Posting 1-Clic",
+    description:
+      "Exportation automatique optimisée pour publier sur Vinted ET Leboncoin simultanément et doubler ta visibilité.",
   },
   {
-    title: "Alerte Anti-Litige IA",
-    description: "Détection d'usure visuelle et protection de ton compte vendeur.",
-  },
-  {
+    icon: RefreshCw,
     title: "Re-publication Anti-Annonce Morte",
-    description: "Reformulation en 1 clic pour remonter ton annonce en tête de fil.",
+    description:
+      "Génère une version réécrite unique pour republier les articles en ligne depuis plus de 10 jours, sans risque de bannissement par les robots Vinted.",
+  },
+  {
+    icon: Gem,
+    title: "Estimation Pépites & Marques",
+    description:
+      "Détection précise des modèles rares et des vrais prix de vente constatés pour éviter de sous-vendre.",
   },
 ];
 
 function ProPage() {
   return (
     <div className="pb-6">
-      <AppHeader title="Pro" subtitle="Le pack vendeur 4,99 € / mois" />
+      <AppHeader
+        title="Pro"
+        subtitle="Le pack vendeur pour gagner du temps et doubler tes ventes"
+      />
+
       <div className="app-container space-y-5 py-5">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Rentabilisé dès ta 1ère vente du mois
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Gagne 3 heures par semaine et fais sauter les blocages d'algorithme
+            Vinted.
+          </p>
+        </div>
+
         <div
           className="sheen relative overflow-hidden rounded-3xl p-6 shadow-card"
           style={{ background: "var(--gradient-brand)" }}
@@ -56,45 +92,54 @@ function ProPage() {
             <Crown className="size-3" />
             Pack Pro
           </span>
-          <p className="mt-3 text-xl font-semibold text-white">ResellBoost Pro</p>
-          <p className="mt-1 text-4xl font-bold tracking-tight text-white">
-            4,99 € <span className="text-sm font-medium text-white/80">/ mois</span>
+          <p className="mt-3 text-xl font-semibold text-white">
+            ResellBoost Pro
           </p>
-          <p className="mt-1 text-sm text-white/85">Sans engagement, résiliable à tout moment.</p>
-
-          <button
-            type="button"
-            onClick={() => toast.info("Paiement bientôt disponible")}
-            className="pulse-glow mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-background px-4 py-4 text-sm font-bold text-foreground transition-transform active:scale-[0.97]"
-          >
-            <Sparkles className="size-4 text-primary" />
-            Passer à Pro
-          </button>
+          <p className="mt-1 text-4xl font-bold tracking-tight text-white">
+            4,99 €{" "}
+            <span className="text-sm font-medium text-white/80">/ mois</span>
+          </p>
+          <p className="mt-1 text-sm text-white/85">
+            Sans engagement, résiliable à tout moment.
+          </p>
         </div>
 
-        <div className="glass-card space-y-1 p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            4 avantages exclusifs
-          </p>
-          <ul className="mt-3 space-y-3">
-            {features.map((feature) => (
-              <li
+        <div className="grid gap-3">
+          {features.map((feature) => {
+            const Icon = feature.icon;
+            return (
+              <div
                 key={feature.title}
-                className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3"
+                className="glass-card flex items-start gap-4 p-4 transition-transform active:scale-[0.98]"
               >
-                <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-success/15">
-                  <Check className="size-3 text-success" strokeWidth={3} />
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-accent text-accent-foreground">
+                  <Icon className="size-5 text-primary" strokeWidth={2} />
                 </span>
                 <div>
                   <p className="text-sm font-semibold">{feature.title}</p>
-                  <p className="text-xs text-muted-foreground">{feature.description}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </div>
-              </li>
-            ))}
-          </ul>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-2 pt-1">
+          <button
+            type="button"
+            onClick={() => toast.info("Paiement bientôt disponible")}
+            className="cta-glow pulse-glow flex h-13 w-full items-center justify-center gap-2 rounded-2xl px-4 py-4 text-sm font-bold"
+          >
+            <Sparkles className="size-4" />
+            Débloquer le Pack Pro — 4,99 € / mois
+          </button>
+          <p className="text-center text-xs text-muted-foreground">
+            Sans engagement • Annulable en 1 clic
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
