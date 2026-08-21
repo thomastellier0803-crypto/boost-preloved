@@ -60,13 +60,10 @@ const THEMES = [
 function SettingsPage() {
   const [prefs, setLocalPrefs] = useState<Prefs>(defaultPrefs);
   const [count, setCount] = useState(0);
-  const [code, setCode] = useState("");
-  const [creator, setCreatorState] = useState(false);
 
   useEffect(() => {
     setLocalPrefs(getPrefs());
     setCount(getHistory().length);
-    setCreatorState(isCreator());
   }, []);
 
   function update(patch: Partial<Prefs>) {
