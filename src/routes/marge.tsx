@@ -1,21 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Euro } from "lucide-react";
+import { Euro, TrendingUp } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 
 export const Route = createFileRoute("/marge")({
   head: () => ({
     meta: [
-      { title: "Calculateur de gain net — ResellBoost AI" },
+      { title: "Calculateur de marge — ResellBoost AI" },
       {
         name: "description",
         content:
-          "Estimez ce qu'il vous reste réellement après la vente sur Vinted, Leboncoin ou Vestiaire.",
+          "Estimez votre bénéfice net et votre marge en % entre le prix d'achat et le prix de revente.",
       },
-      { property: "og:title", content: "Calculateur de gain net — ResellBoost AI" },
+      { property: "og:title", content: "Calculateur de marge — ResellBoost AI" },
       {
         property: "og:description",
-        content: "Gain net estimé dans votre poche en un coup d'œil.",
+        content: "Bénéfice net et marge estimés en un coup d'œil.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -59,12 +59,17 @@ const SPEED_PRESETS = [
 ] as const;
 
 function MarginPage() {
+  const [buy, setBuy] = useState("");
   const [sell, setSell] = useState("");
-  const net = Number.isFinite(parseFloat(sell)) ? parseFloat(sell) : 0;
+
+  const buyNum = Number.isFinite(parseFloat(buy)) ? parseFloat(buy) : 0;
+  const sellNum = Number.isFinite(parseFloat(sell)) ? parseFloat(sell) : 0;
+  const benefit = sellNum - buyNum;
+  const marginPercent = buyNum > 0 ? (benefit / buyNum) * 100 : 0;
 
   return (
     <div className="pb-6">
-      <AppHeader title="Net en poche" subtitle="Ce que tu touches vraiment" />
+      <AppHeader title="Marge réelle" subtitle="Prix d'achat vs prix de revente" />
       <div className="app-container space-y-5 py-5">
         <div className="glass-card space-y-4 p-4">
           <div className="space-y-2">
@@ -89,7 +94,8 @@ function MarginPage() {
               ))}
             </div>
           </div>
-          <MoneyField label="Prix de vente affiché" value={sell} onChange={setSell} />
+          <MoneyField label="Prix d'achat (€)" value={buy} onChange={setBuy} />
+          <MoneyField label="Prix de revente (€)" value={sell} onChange={setSell} />
         </div>
 
         <div
@@ -99,22 +105,23 @@ function MarginPage() {
           }}
         >
           <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
-            Gain net estimé dans ta poche
+            Bénéfice net estimé
           </p>
           <p className="mt-1 text-5xl font-bold tracking-tight text-white">
-            {net.toFixed(2)} €
+            {benefit.toFixed(2)} €
           </p>
-          <p className="mt-3 text-sm font-medium text-white/90">
-            Sur Vinted, c'est le prix affiché que tu touches.
-          </p>
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-sm font-semibold text-white">
+            <TrendingUp className="size-4" />
+            {marginPercent >= 0 ? "+" : ""}
+            {marginPercent.toFixed(0)}% de marge
+          </div>
         </div>
 
         <div className="rounded-2xl border border-border bg-muted/50 p-4 text-xs text-muted-foreground">
-          L'acheteur Vinted paie les frais de protection et la livraison : en tant que vendeur
-          particulier, tu reçois en général le montant affiché.
+          Le bénéfice net correspond au prix de revente moins le prix d'achat. La marge en % est
+          calculée par rapport à ton investissement initial.
         </div>
       </div>
     </div>
   );
 }
-

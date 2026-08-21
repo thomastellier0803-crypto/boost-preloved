@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { KeyRound, Moon, ShieldCheck, Sun, SunMoon, Trash2 } from "lucide-react";
+import { Moon, Sun, SunMoon, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { Chip } from "@/components/Chip";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   applyTheme,
@@ -13,9 +12,6 @@ import {
   getHistory,
   getPrefs,
   setPrefs,
-  isCreator,
-  setCreator,
-  CREATOR_CODE,
   type Prefs,
 } from "@/lib/local-store";
 import { CONDITIONS, PLATFORMS } from "@/lib/resell-data";
@@ -64,13 +60,10 @@ const THEMES = [
 function SettingsPage() {
   const [prefs, setLocalPrefs] = useState<Prefs>(defaultPrefs);
   const [count, setCount] = useState(0);
-  const [code, setCode] = useState("");
-  const [creator, setCreatorState] = useState(false);
 
   useEffect(() => {
     setLocalPrefs(getPrefs());
     setCount(getHistory().length);
-    setCreatorState(isCreator());
   }, []);
 
   function update(patch: Partial<Prefs>) {
@@ -142,61 +135,6 @@ function SettingsPage() {
               onCheckedChange={(checked) => update({ noEmoji: checked })}
             />
           </div>
-        </Section>
-
-        <Section title="Créateur">
-          {creator ? (
-            <Row>
-              <div className="flex items-center gap-2 rounded-2xl bg-success/15 p-3 text-sm font-semibold text-success">
-                <ShieldCheck className="size-4" />
-                Créateur Pro Illimité actif
-              </div>
-              <button
-                type="button"
-                className="mt-1 w-full rounded-2xl border border-border py-3 text-sm font-medium transition-colors hover:bg-muted"
-                onClick={() => {
-                  setCreator(false);
-                  setCreatorState(false);
-                  toast.success("Mode créateur désactivé");
-                }}
-              >
-                Désactiver le mode créateur
-              </button>
-            </Row>
-          ) : (
-            <Row>
-              <p className="text-sm font-medium">Code Administrateur</p>
-              <div className="relative">
-                <KeyRound className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary" />
-                <Input
-                  id="admin-code"
-                  type="password"
-                  autoComplete="off"
-                  maxLength={32}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  placeholder="Saisir le code"
-                  className="h-12 rounded-2xl bg-card pl-11 tracking-[0.25em] shadow-card"
-                />
-              </div>
-              <button
-                type="button"
-                className="cta-glow mt-1 w-full rounded-2xl py-3 text-sm font-semibold"
-                onClick={() => {
-                  if (code.trim() === CREATOR_CODE) {
-                    setCreator(true);
-                    setCreatorState(true);
-                    setCode("");
-                    toast.success("Mode Créateur Débloqué !");
-                  } else {
-                    toast.error("Code administrateur invalide");
-                  }
-                }}
-              >
-                Valider le code
-              </button>
-            </Row>
-          )}
         </Section>
 
         <Section title="Données">
