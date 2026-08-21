@@ -1,10 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { KeyRound, Moon, ShieldCheck, Sun, SunMoon, Trash2 } from "lucide-react";
+import { Moon, Sun, SunMoon, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { Chip } from "@/components/Chip";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   applyTheme,
@@ -13,9 +12,6 @@ import {
   getHistory,
   getPrefs,
   setPrefs,
-  isCreator,
-  setCreator,
-  CREATOR_CODE,
   type Prefs,
 } from "@/lib/local-store";
 import { CONDITIONS, PLATFORMS } from "@/lib/resell-data";
