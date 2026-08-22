@@ -155,12 +155,30 @@ export function ResultPanel({ result }: { result: AnalysisResult }) {
         )}
       </div>
 
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(all);
+          } catch {
+            /* ignore */
+          }
+          toast.success("Texte copié ! Colle directement sur Vinted.");
+          window.open("https://www.vinted.fr/items/new", "_blank", "noopener,noreferrer");
+        }}
+        className="cta-glow flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold"
+      >
+        <ExternalLink className="size-5" />
+        Copier &amp; Ouvrir Vinted
+      </button>
+
       <div className="grid grid-cols-2 gap-2">
         <CopyButton label="Copier le titre" value={title} />
         <CopyButton label="Copier la description" value={description} />
         {withHashtags ? <CopyButton label="Copier les hashtags" value={hashtags} /> : null}
         <CopyButton label="Tout copier" value={all} variant="default" />
       </div>
+
     </div>
   );
 }
