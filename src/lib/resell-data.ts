@@ -94,7 +94,7 @@ export const KID_SIZES = [
   "14 ans (164 cm)",
   "16 ans (176 cm)",
 ];
-export const SHOE_SIZES = Array.from({ length: 15 }, (_, i) => String(34 + i));
+export const SHOE_SIZES = Array.from({ length: 11 }, (_, i) => String(36 + i));
 
 export const CONDITIONS = [
   "Neuf avec étiquette",
@@ -103,6 +103,52 @@ export const CONDITIONS = [
   "Bon état",
   "Satisfaisant",
 ] as const;
+
+export const GENDERS = ["Homme", "Femme", "Enfant", "Unisexe"] as const;
+
+export const COLORS = [
+  "Noir",
+  "Blanc",
+  "Gris",
+  "Beige",
+  "Marron",
+  "Bleu",
+  "Bleu marine",
+  "Vert",
+  "Kaki",
+  "Rouge",
+  "Bordeaux",
+  "Rose",
+  "Violet",
+  "Jaune",
+  "Orange",
+  "Multicolore",
+];
+
+export const MATERIALS = [
+  "Coton",
+  "Denim",
+  "Cuir",
+  "Laine",
+  "Polyester",
+  "Lin",
+  "Velours",
+  "Nylon",
+  "Cachemire",
+  "Synthétique",
+  "Molleton",
+  "Jersey",
+];
+
+export const STYLES = ["Oversize", "Ajusté", "Vintage", "Streetwear", "Classique", "Sport"];
+
+export const CONDITION_DETAILS: Record<string, string> = {
+  "Neuf avec étiquette": "Jamais porté, étiquette d'origine",
+  "Neuf sans étiquette": "Jamais porté, sans étiquette",
+  "Très bon état": "Porté quelques fois, sans défauts",
+  "Bon état": "Porté, légères traces d'usage",
+  Satisfaisant: "Usure visible, bouloches ou taches",
+};
 
 export const FITS = ["Regular", "Slim", "Oversize", "Cargo", "Straight", "Baggy", "Skinny", "Droite"];
 
