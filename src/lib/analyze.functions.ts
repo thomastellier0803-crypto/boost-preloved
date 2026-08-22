@@ -9,6 +9,10 @@ const inputSchema = z.object({
   subcategory: z.string().optional(),
   size: z.string().optional(),
   condition: z.string().optional(),
+  gender: z.string().optional(),
+  color: z.string().optional(),
+  material: z.string().optional(),
+  style: z.string().optional(),
 });
 
 const outputSchema = z.object({
@@ -88,6 +92,10 @@ export const analyzeGarment = createServerFn({ method: "POST" })
       data.category ? `Catégorie : ${data.category} ${data.subcategory ?? ""}.` : "",
       data.size ? `Taille indiquée : ${data.size}.` : "",
       data.condition ? `État indiqué : ${data.condition}.` : "",
+      data.gender ? `Genre : ${data.gender}.` : "",
+      data.color ? `Couleur indiquée : ${data.color}.` : "",
+      data.material ? `Matière indiquée : ${data.material}.` : "",
+      data.style ? `Style / coupe : ${data.style}.` : "",
     ]
       .filter(Boolean)
       .join(" ");
