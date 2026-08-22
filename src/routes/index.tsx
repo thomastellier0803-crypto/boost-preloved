@@ -5,17 +5,22 @@ import { Check, Lightbulb, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { BrandCombobox } from "@/components/BrandCombobox";
-import { Chip, ChipGroup } from "@/components/Chip";
 import { PaywallDialog } from "@/components/PaywallDialog";
 import { PhotoUploader, type Photos } from "@/components/PhotoUploader";
 import { ResultPanel } from "@/components/ResultPanel";
+import { SelectSheet } from "@/components/SelectSheet";
 import { analyzeGarment } from "@/lib/analyze.functions";
 import {
   CATEGORIES,
+  COLORS,
   CONDITIONS,
+  CONDITION_DETAILS,
+  GENDERS,
+  MATERIALS,
   PLATFORMS,
   SHOE_SIZES,
   SIZES,
+  STYLES,
   KID_SIZES,
   type AnalysisResult,
   type Platform,
@@ -56,6 +61,8 @@ const LOADING_STEPS = [
   "Détection de la marque, taille et composition...",
   "Estimation des prix sur le marché d'occasion...",
 ];
+
+const opts = (values: readonly string[]) => values.map((v) => ({ value: v, label: v }));
 
 function SegmentedPlatforms({
   value,
@@ -98,14 +105,36 @@ function ResultSkeleton() {
   );
 }
 
+function SectionCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+      <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </p>
+      <div className="space-y-2">{children}</div>
+    </section>
+  );
+}
+
 function Scanner() {
   const analyze = useServerFn(analyzeGarment);
   const [photos, setPhotos] = useState<Photos>({});
   const [brand, setBrand] = useState("");
+  const [brandOpen, setBrandOpen] = useState(false);
+  const [gender, setGender] = useState("");
   const [category, setCategory] = useState("");
   const [subcategory, setSubcategory] = useState("");
   const [size, setSize] = useState("");
   const [condition, setCondition] = useState("Très bon état");
+  const [color, setColor] = useState("");
+  const [material, setMaterial] = useState("");
+  const [style, setStyle] = useState("");
   const [platform, setPlatform] = useState<Platform>("Vinted");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -140,7 +169,13 @@ function Scanner() {
     });
     toast.success("État et prix ajustés");
   }
-  const baseSizes = category === "Chaussures" ? SHOE_SIZES : [...SIZES, ...KID_SIZES];
+
+  const baseSizes =
+    category === "Chaussures"
+      ? SHOE_SIZES
+      : gender === "Enfant"
+        ? KID_SIZES
+        : [...SIZES, ...KID_SIZES];
   const sizeOptions = size && !baseSizes.includes(size) ? [size, ...baseSizes] : baseSizes;
 
   async function run() {
@@ -157,7 +192,19 @@ function Scanner() {
     const timers = [setTimeout(() => setStep(1), 2500), setTimeout(() => setStep(2), 6000)];
     try {
       const data = await analyze({
-        data: { images, platform, brand, category, subcategory, size, condition },
+        data: {
+          images,
+          platform,
+          brand,
+          category,
+          subcategory,
+          size,
+          condition,
+          gender,
+          color,
+          material,
+          style,
+        },
       });
       const parcel = (["Petit", "Moyen", "Grand"] as const).includes(data.parcel as "Petit")
         ? (data.parcel as AnalysisResult["parcel"])
@@ -172,6 +219,8 @@ function Scanner() {
         }
       }
       if (data.size) setSize(data.size);
+      if (data.color) setColor(data.color);
+      if (data.material) setMaterial(data.material);
       if (data.condition && (CONDITIONS as readonly string[]).includes(data.condition)) {
         setCondition(data.condition);
       }
@@ -193,125 +242,160 @@ function Scanner() {
   }
 
   return (
-    <div className="pb-6">
+    <div className="pb-32">
       <AppHeader
         title="Scanner"
         subtitle="Analyse photo et estimation de prix"
         {...(creator ? {} : { credits: { used, quota: FREE_QUOTA } })}
       />
-      <div className="app-container space-y-6 py-5">
+      <div className="app-container space-y-4 py-5">
         <PhotoUploader photos={photos} onChange={setPhotos} />
 
-        <div className="glass-card space-y-5 p-4">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Marque
-            </p>
-            <BrandCombobox value={brand} onChange={setBrand} />
-          </div>
-
-          <ChipGroup label="Catégorie">
-            {Object.keys(CATEGORIES).map((c) => (
-              <Chip
-                key={c}
-                active={category === c}
-                onClick={() => {
-                  setCategory(category === c ? "" : c);
-                  setSubcategory("");
-                  setSize("");
+        <SectionCard title="Informations principales">
+          {brandOpen ? (
+            <div className="space-y-2 rounded-2xl border border-primary/40 bg-card p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Marque
+              </p>
+              <BrandCombobox
+                value={brand}
+                onChange={(v) => {
+                  setBrand(v);
+                  setBrandOpen(false);
                 }}
+              />
+              <button
+                type="button"
+                onClick={() => setBrandOpen(false)}
+                className="text-xs font-medium text-muted-foreground"
               >
-                {c}
-              </Chip>
-            ))}
-          </ChipGroup>
-
-          {category ? (
-            <ChipGroup label="Sous-catégorie">
-              {(CATEGORIES[category] ?? []).map((s) => (
-                <Chip
-                  key={s}
-                  active={subcategory === s}
-                  onClick={() => setSubcategory(subcategory === s ? "" : s)}
-                >
-                  {s}
-                </Chip>
-              ))}
-            </ChipGroup>
-          ) : null}
-
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Taille
-            </p>
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-              {sizeOptions.map((s) => (
-                <Chip
-                  key={s}
-                  active={size === s}
-                  onClick={() => setSize(size === s ? "" : s)}
-                  className="shrink-0 whitespace-nowrap"
-                >
-                  {s}
-                </Chip>
-              ))}
+                Fermer
+              </button>
             </div>
-          </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setBrandOpen(true)}
+              className={`flex w-full items-center justify-between gap-3 rounded-2xl border bg-card px-4 py-3 text-left ${
+                brand ? "border-primary/40" : "border-border"
+              }`}
+            >
+              <span className="min-w-0">
+                <span className="block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Marque
+                </span>
+                <span
+                  className={`block truncate text-sm ${brand ? "font-semibold" : "font-medium text-muted-foreground"}`}
+                >
+                  {brand || "Choisir une marque"}
+                </span>
+              </span>
+            </button>
+          )}
 
-          <ChipGroup label="État">
-            {CONDITIONS.map((c) => (
-              <Chip key={c} active={condition === c} onClick={() => setCondition(c)}>
-                {c}
-              </Chip>
-            ))}
-          </ChipGroup>
+          <SelectSheet
+            label="Genre"
+            value={gender}
+            options={opts(GENDERS)}
+            onChange={(v) => {
+              setGender(v);
+              setSize("");
+            }}
+            columns={2}
+          />
 
-          {showWearAlert && result ? (
-            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3.5">
-              <div className="flex gap-2.5">
-                <Lightbulb className="mt-0.5 size-4 shrink-0 text-destructive" />
-                <div className="space-y-2">
-                  <p className="text-xs leading-relaxed">
-                    <span className="font-semibold">Conseil Vendeur IA :</span> l'IA détecte une
-                    usure visuelle sur le tissu
-                    {result.wearNote ? ` (${result.wearNote})` : ""}. Pour éviter un litige Vinted
-                    ou une note 1 étoile, nous vous conseillons l'État satisfaisant (prix ajusté
-                    conseillé : {adjustedPrice} €).
-                  </p>
-                  <button
-                    type="button"
-                    onClick={applyRecommendation}
-                    className="rounded-full bg-destructive px-3.5 py-1.5 text-[11px] font-semibold text-destructive-foreground"
-                  >
-                    Appliquer la recommandation
-                  </button>
-                </div>
+          <SelectSheet
+            label="Catégorie"
+            value={category}
+            options={opts(Object.keys(CATEGORIES))}
+            onChange={(v) => {
+              setCategory(v);
+              setSubcategory("");
+              setSize("");
+            }}
+            columns={2}
+          />
+
+          <SelectSheet
+            label="Sous-catégorie"
+            value={subcategory}
+            placeholder={category ? "Choisir" : "Sélectionne une catégorie"}
+            options={opts(CATEGORIES[category] ?? [])}
+            onChange={setSubcategory}
+            columns={2}
+            disabled={!category}
+          />
+
+          <SelectSheet
+            label="Taille"
+            value={size}
+            options={opts(sizeOptions)}
+            onChange={setSize}
+            columns={category === "Chaussures" ? 3 : 2}
+            description={
+              category === "Chaussures" ? "Pointures 36 à 46" : "Tailles adulte et enfant"
+            }
+          />
+
+          <SelectSheet
+            label="État"
+            value={condition}
+            options={CONDITIONS.map((c) => ({
+              value: c,
+              label: c,
+              hint: CONDITION_DETAILS[c] ?? "",
+            }))}
+            onChange={(v) => setCondition(v || "Très bon état")}
+            columns={1}
+            clearable={false}
+          />
+        </SectionCard>
+
+        <SectionCard title="Détails optionnels">
+          <SelectSheet label="Couleur" value={color} options={opts(COLORS)} onChange={setColor} />
+          <SelectSheet
+            label="Matière"
+            value={material}
+            options={opts(MATERIALS)}
+            onChange={setMaterial}
+            columns={2}
+          />
+          <SelectSheet
+            label="Style / coupe"
+            value={style}
+            options={opts(STYLES)}
+            onChange={setStyle}
+            columns={2}
+          />
+        </SectionCard>
+
+        <SectionCard title="Format d'annonce">
+          <SegmentedPlatforms value={platform} onChange={setPlatform} />
+        </SectionCard>
+
+        {showWearAlert && result ? (
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3.5">
+            <div className="flex gap-2.5">
+              <Lightbulb className="mt-0.5 size-4 shrink-0 text-destructive" />
+              <div className="space-y-2">
+                <p className="text-xs leading-relaxed">
+                  <span className="font-semibold">Conseil Vendeur IA :</span> l'IA détecte une
+                  usure visuelle sur le tissu
+                  {result.wearNote ? ` (${result.wearNote})` : ""}. Pour éviter un litige Vinted ou
+                  une note 1 étoile, nous vous conseillons l'État satisfaisant (prix ajusté
+                  conseillé : {adjustedPrice} €).
+                </p>
+                <button
+                  type="button"
+                  onClick={applyRecommendation}
+                  className="rounded-full bg-destructive px-3.5 py-1.5 text-[11px] font-semibold text-destructive-foreground"
+                >
+                  Appliquer la recommandation
+                </button>
               </div>
             </div>
-          ) : null}
-
-
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Format d'annonce
-            </p>
-            <SegmentedPlatforms value={platform} onChange={setPlatform} />
           </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={run}
-          disabled={loading}
-          className="cta-glow flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold disabled:opacity-70"
-        >
-          {loading ? (
-            <Loader2 className="size-5 animate-spin" />
-          ) : (
-            <Sparkles className="size-5" />
-          )}
-          {loading ? "Analyse en cours" : "Analyser et générer"}
-        </button>
+        ) : null}
 
         {loading ? (
           <div className="space-y-4">
@@ -353,6 +437,25 @@ function Scanner() {
 
         {!loading && result ? <ResultPanel result={result} /> : null}
       </div>
+
+      <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 border-t border-border/60 bg-background/80 backdrop-blur-xl">
+        <div className="app-container py-3">
+          <button
+            type="button"
+            onClick={run}
+            disabled={loading}
+            className="cta-glow flex h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-semibold disabled:opacity-70"
+          >
+            {loading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Sparkles className="size-5" />
+            )}
+            {loading ? "Analyse en cours" : "Analyser et générer"}
+          </button>
+        </div>
+      </div>
+
       <PaywallDialog open={paywall} onOpenChange={setPaywall} />
     </div>
   );
