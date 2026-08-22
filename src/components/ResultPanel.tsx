@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Copy, Check, Package, AlertTriangle } from "lucide-react";
+import { Copy, Check, ExternalLink, Package, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
