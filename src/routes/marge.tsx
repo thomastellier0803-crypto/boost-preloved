@@ -1,105 +1,119 @@
+
+
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Euro, ShieldCheck } from "lucide-react";
-import { AppHeader } from "@/components/AppHeader";
+import { BadgeCheck, Euro, Zap, Scale, TrendingUp } from "lucide-react";
+import { LargeTitle } from "@/components/LargeTitle";
+import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/marge")({
+export const Route = createFileRoute("/prix")({
+  component: PrixPage,
+  validateSearch: (search: Record<string, unknown>): { p?: number } => {
+    const p = Number(search["p"]);
+    return Number.isFinite(p) && p > 0 ? { p: Math.round(p) } : {};
+  },
   head: () => ({
     meta: [
-      { title: "Estimation de Prix — ResellBoost AI" },
-      {
-        name: "description",
-        content:
-          "Choisis ton prix de vente Vinted selon la vitesse souhaitée : vente rapide, prix moyen ou prix fort. Tu reçois 100 % du prix affiché.",
-      },
-      { property: "og:title", content: "Estimation de Prix — ResellBoost AI" },
-      {
-        property: "og:description",
-        content: "Fixe le bon prix de vente sur Vinted en un geste.",
-      },
+      { title: "Prix de vente — ResellBoost AI" },
+      { name: "description", content: "Fixe le bon prix de vente Vinted : vente rapide, prix du marché ou prix fort. Sur Vinted, tu reçois 100 % du prix affiché." },
+      { property: "og:title", content: "Prix de vente — ResellBoost AI" },
+      { property: "og:description", content: "Trois stratégies de prix Vinted en un geste : rapide, moyen ou fort." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: PricePage,
 });
 
-const SPEED_PRESETS = [
-  { key: "quick", label: "Vente rapide", price: "3" },
-  { key: "avg", label: "Prix moyen", price: "5" },
-  { key: "high", label: "Prix fort", price: "7" },
-] as const;
+type Strategy = "quick" | "mid" | "max";
 
-function PricePage() {
-  const [price, setPrice] = useState("");
-  const num = Number.isFinite(parseFloat(price)) ? parseFloat(price) : 0;
+const strategies: { key: Strategy; label: string; hint: string; factor: number; icon: typeof Zap }[] = [
+  { key: "quick", label: "Vente rapide", hint: "-15 %", factor: 0.85, icon: Zap },
+  { key: "mid", label: "Prix du marché", hint: "référence", factor: 1, icon: Scale },
+  { key: "max", label: "Prix fort", hint: "+15 %", factor: 1.15, icon: TrendingUp },
+];
+
+function PrixPage() {
+  const { p } = Route.useSearch();
+  
+  // L'ancre de référence (le prix généré par l'IA ou 20 par défaut).
+  // Elle ne bouge JAMAIS quand on clique sur les pourcentages.
+  const [anchorPrice, setAnchorPrice] = useState(p && p > 0 ? p : 20);
+  
+  // Le prix final affiché à l'écran.
+  const [displayPrice, setDisplayPrice] = useState(String(anchorPrice));
+  const [active, setActive] = useState<Strategy | null>(p ? "mid" : "mid");
+
+  const applyStrategy = (factor: number, key: Strategy) => {
+    // Le calcul se fait TOUJOURS depuis l'ancre fixe, empêchant le cumul des pourcentages.
+    const nextPrice = Math.max(1, Math.round(anchorPrice * factor));
+    setDisplayPrice(String(nextPrice));
+    setActive(key);
+  };
+
+  const handleManualInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setDisplayPrice(val);
+    setActive(null);
+    
+    const num = parseFloat(val);
+    // Si l'utilisateur tape manuellement un prix valide, ce prix devient la NOUVELLE ancre.
+    if (Number.isFinite(num) && num > 0) {
+      setAnchorPrice(num);
+    }
+  };
 
   return (
-    <div className="pb-6">
-      <AppHeader title="Estimation de Prix" subtitle="Fixe le bon prix de vente" />
-      <div className="app-container space-y-5 py-5">
-        <div className="glass-card space-y-4 p-4">
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Vitesse de vente
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {SPEED_PRESETS.map((p) => (
-                <button
-                  key={p.key}
-                  type="button"
-                  onClick={() => setPrice(p.price)}
-                  className={
-                    price === p.price
-                      ? "cta-glow rounded-2xl px-2 py-2.5 text-[11px] font-semibold leading-tight"
-                      : "rounded-2xl border border-border bg-card px-2 py-2.5 text-[11px] font-medium leading-tight text-muted-foreground"
-                  }
-                >
-                  {p.label}
-                  <span className="mt-0.5 block text-sm font-bold">{p.price} €</span>
-                </button>
-              ))}
-            </div>
-          </div>
+    <main className="mx-auto max-w-lg px-4 pb-32">
+      <LargeTitle title="Prix" subtitle="Choisis ta stratégie de vente." />
 
-          <label className="block space-y-1.5">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Prix de vente (€)
+      <div className="grid grid-cols-3 gap-2">
+        {strategies.map(({ key, label, hint, factor, icon: Icon }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => applyStrategy(factor, key)}
+            className={cn(
+              "flex flex-col items-center gap-1 rounded-2xl p-3 text-center shadow-ios transition active:scale-[0.97]",
+              active === key ? "bg-primary text-primary-foreground shadow-cta" : "bg-card text-foreground"
+            )}
+          >
+            <Icon className={cn("h-4 w-4", active === key ? "text-primary-foreground" : "text-primary")} />
+            <span className="text-[12px] font-semibold leading-tight">{label}</span>
+            <span className={cn("text-[11px]", active === key ? "text-primary-foreground/75" : "text-muted-foreground")}>
+              {hint}
             </span>
-            <span className="relative block">
-              <Euro className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-primary" />
-              <input
-                inputMode="decimal"
-                value={price}
-                onChange={(e) => setPrice(e.target.value.replace(",", "."))}
-                placeholder="0,00"
-                className="h-14 w-full rounded-2xl border border-border bg-card pl-11 pr-4 text-lg font-semibold tracking-tight shadow-card outline-none transition-shadow focus:border-primary focus:shadow-glow"
-              />
-            </span>
-          </label>
-        </div>
-
-        <div
-          className="relative overflow-hidden rounded-3xl p-6 text-center shadow-card"
-          style={{
-            background: "linear-gradient(135deg, oklch(0.62 0.15 162), oklch(0.72 0.16 172))",
-          }}
-        >
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-white/80">
-            Tu reçois
-          </p>
-          <p className="mt-1 text-5xl font-bold tracking-tight text-white">{num.toFixed(2)} €</p>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white">
-            <ShieldCheck className="size-4" />
-            Sur Vinted, tu reçois 100 % du prix affiché.
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border bg-muted/50 p-4 text-xs text-muted-foreground">
-          Les frais de protection acheteur et la livraison sont payés par l'acheteur : le montant
-          affiché sur ton annonce est celui que tu encaisses.
-        </div>
+          </button>
+        ))}
       </div>
-    </div>
+
+      <section className="mt-4 rounded-3xl bg-gradient-to-b from-accent/70 to-card p-6 text-center shadow-ios ring-1 ring-primary/10">
+        <p className="text-[12px] font-semibold uppercase tracking-wider text-primary">
+          Prix de vente
+        </p>
+        <label className="mt-2 flex items-baseline justify-center gap-1.5">
+          <input
+            inputMode="decimal"
+            value={displayPrice}
+            onChange={handleManualInput}
+            style={{ width: `${Math.max(1, displayPrice.length) + 0.4}ch` }}
+            className="max-w-[60%] bg-transparent text-center text-[64px] font-bold leading-none tracking-tighter text-foreground outline-none tabular-nums"
+            aria-label="Prix de vente en euros"
+          />
+          <span className="flex items-center text-3xl font-semibold text-primary">
+            <Euro className="h-8 w-8" strokeWidth={2.4} />
+          </span>
+        </label>
+        <p className="mt-3 text-[12px] text-muted-foreground">
+          Touche une stratégie ci-dessus pour ajuster ce prix instantanément, ou saisis-le directement.
+        </p>
+      </section>
+
+      <section className="mt-4 flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-emerald-800 shadow-ios">
+        <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+        <p className="text-[14px] font-medium leading-snug">
+          Sur Vinted, tu reçois 100 % du prix affiché.
+        </p>
+      </section>
+    </main>
   );
 }
